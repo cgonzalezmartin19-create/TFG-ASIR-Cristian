@@ -1,0 +1,26 @@
+trigger:
+- main
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+steps:
+- checkout: self
+
+- script: |
+    sudo apt-get update
+    sudo apt-get install -y gnupg software-properties-common curl
+    curl -fsSL https://apt.releases.hashicorp.com/gpg | gpg --dearmor > hashicorp.gpg
+    sudo install -o root -g root -m 644 hashicorp.gpg /etc/apt/trusted.gpg.d/
+    sudo apt-add-repository "deb [arch=amd64] https://apt.releases.hashicorp.com $(lsb_release -cs) main"
+    sudo apt-get update && sudo apt-get install terraform
+  displayName: "Instalar Terraform"
+
+- script: terraform init
+  displayName: 'Terraform Init'
+
+- script: terraform fmt -check
+  displayName: 'Terraform Format Check'
+
+- script: terraform validate
+  displayName: 'Terraform Validate'
